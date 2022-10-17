@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Form,
   NavLink,
@@ -5,6 +6,7 @@ import {
   redirect,
   useLoaderData,
   useNavigation,
+  useSubmit,
 } from "react-router-dom";
 
 // URL segments, layouts, and data are more often than not coupled (tripled?) together. We can see it in this app already:
@@ -26,11 +28,26 @@ export async function loader({ request }) {
   const url = new URL(request.url);
   const q = url.searchParams.get("q");
   const contacts = await getContacts(q);
+  /**
+   * 1. If you click back after a search, the form field still has the value you entered even though the list is no longer filtered.
+   * 2. If you refresh the page after searching, the form field no longer has the value in it, even though the list is filtered
+   */
   return { contacts };
 }
+
 export default function Root() {
-  const { contacts } = useLoaderData();
+  const { contacts, q } = useLoaderData();
   const navigation = useNavigation();
+  const submit = useSubmit();
+  /**
+   * Now for problem (1), clicking the back button and updating the input.
+   * We can bring in useEffect from React to manipulate the form's state in the DOM directly.
+   * You don't control the URL, the user does with the back/forward buttons.
+   */
+  React.useEffect(() => {
+    document.getElementById("q").value = q;
+  }, [q]);
+
   return (
     <>
       <div id="sidebar">
@@ -46,6 +63,16 @@ export default function Root() {
               placeholder="Search"
               type="search"
               name="q"
+              /**
+               *  That solves problem (2). If you refresh the page now, the input field will show the query.
+               */
+              defaultValue={q}
+              /**
+               * For this UI, we'd probably rather have the filtering happen on every key stroke instead of when the form is explicitly submitted.
+               */
+              onChange={(event) => {
+                submit(event.currentTarget.form);
+              }}
             />
             <div id="search-spinner" aria-hidden hidden={true} />
             <div className="sr-only" aria-live="polite"></div>
