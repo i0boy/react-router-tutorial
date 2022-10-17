@@ -90,7 +90,14 @@ export default function Root() {
                * For this UI, we'd probably rather have the filtering happen on every key stroke instead of when the form is explicitly submitted.
                */
               onChange={(event) => {
-                submit(event.currentTarget.form);
+                const isFirstSearch = q == null;
+                submit(event.currentTarget.form, {
+                  // The replace option tells React Router to replace the current history entry instead of adding a new one.
+                  // We only want to replace search results,
+                  // not the page before we started searching,
+                  // so we do a quick check if this is the first search or not and then decide to replace.
+                  replace: !isFirstSearch,
+                });
               }}
             />
             <div id="search-spinner" aria-hidden hidden={!searching} />
