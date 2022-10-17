@@ -16,8 +16,16 @@ export async function action() {
   return redirect(`/contacts/${contact.id}/edit`);
 }
 
-export async function loader() {
-  const contacts = await getContacts();
+export async function loader({ request }) {
+  /**
+   * Because this is a GET, not a POST, React Router does not call the action.
+   * Submitting a GET form is the same as clicking a link: only the URL changes.
+   * That's why the code we added for filtering is in the loader,
+   * not the action of this route.
+   */
+  const url = new URL(request.url);
+  const q = url.searchParams.get("q");
+  const contacts = await getContacts(q);
   return { contacts };
 }
 export default function Root() {
@@ -28,7 +36,10 @@ export default function Root() {
       <div id="sidebar">
         <h1>React Router Contacts</h1>
         <div>
-          <form id="search-form" role="search">
+          {/* when the browser creates the request for the next document, 
+          it doesn't put the form data into the request POST body, 
+          but into the URLSearchParams of a GET request. */}
+          <Form id="search-form" role="search">
             <input
               id="q"
               aria-label="Search contacts"
@@ -38,7 +49,7 @@ export default function Root() {
             />
             <div id="search-spinner" aria-hidden hidden={true} />
             <div className="sr-only" aria-live="polite"></div>
-          </form>
+          </Form>
           <Form method="post">
             <button type="submit">New</button>
           </Form>
