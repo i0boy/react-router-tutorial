@@ -34,19 +34,37 @@ export async function loader({ request }) {
    */
   return { contacts };
 }
-
-export default function Root() {
+const useQ = () => {
   const { contacts, q } = useLoaderData();
-  const navigation = useNavigation();
-  const submit = useSubmit();
   /**
    * Now for problem (1), clicking the back button and updating the input.
    * We can bring in useEffect from React to manipulate the form's state in the DOM directly.
    * You don't control the URL, the user does with the back/forward buttons.
    */
   React.useEffect(() => {
-    document.getElementById("q").value = q;
+    document.getElementById("q").value = q ?? "";
   }, [q]);
+
+  return { q };
+};
+
+const useSearchig = () => {
+  const navigation = useNavigation();
+  /**
+   * The navigation.location will show up when the app is navigating to a new URL and loading the data for it.
+   * It then goes away when there is no pending navigation anymore.
+   */
+  return (
+    navigation.location &&
+    new URLSearchParams(navigation.location.search).has("q")
+  );
+};
+
+export default function Root() {
+  const { contacts } = useLoaderData();
+  const searching = useSearchig();
+  const { q } = useQ();
+  const submit = useSubmit();
 
   return (
     <>
@@ -59,6 +77,7 @@ export default function Root() {
           <Form id="search-form" role="search">
             <input
               id="q"
+              className={searching ? "loading" : ""}
               aria-label="Search contacts"
               placeholder="Search"
               type="search"
@@ -74,7 +93,7 @@ export default function Root() {
                 submit(event.currentTarget.form);
               }}
             />
-            <div id="search-spinner" aria-hidden hidden={true} />
+            <div id="search-spinner" aria-hidden hidden={!searching} />
             <div className="sr-only" aria-live="polite"></div>
           </Form>
           <Form method="post">
