@@ -1,4 +1,4 @@
-import { Form, redirect, useLoaderData } from "react-router-dom";
+import { Form, redirect, useLoaderData, useNavigate } from "react-router-dom";
 import { updateContact } from "../contacts";
 
 export async function action({ request, params }) {
@@ -13,6 +13,7 @@ export async function action({ request, params }) {
 
 export default function EditContact() {
   const contact = useLoaderData();
+  const navigate = useNavigate();
 
   return (
     <Form method="post" id="contact-form">
@@ -58,7 +59,17 @@ export default function EditContact() {
       </label>
       <p>
         <button type="submit">Save</button>
-        <button type="button">Cancel</button>
+        <button
+          type="button"
+          /**
+           * A <button type="button">, while seemingly redundant, is the HTML way of preventing a button from submitting its form.
+           */
+          onClick={() => {
+            navigate(-1);
+          }}
+        >
+          Cancel
+        </button>
       </p>
     </Form>
   );
