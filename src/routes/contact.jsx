@@ -2,7 +2,19 @@ import { Form, useFetcher, useLoaderData } from "react-router-dom";
 import { getContact, updateContact } from "../contacts";
 
 export async function loader({ params }) {
-  return getContact(params.contactId);
+  const contact = await getContact(params.contactId);
+  if (!contact) {
+    /**
+     * Whenever you have an expected error case in a loader or action–like the data not existing–you can throw.
+     * The call stack will break, React Router will catch it,
+     * and the error path is rendered instead. We won't even try to render a null contact.
+     */
+    throw new Response("", {
+      status: 404,
+      statusText: "Not Found",
+    });
+  }
+  return contact;
 }
 export async function action({ request, params }) {
   let formData = await request.formData();
