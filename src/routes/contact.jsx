@@ -1,13 +1,21 @@
-
-import { Form, useLoaderData } from "react-router-dom";
-import { getContact } from "../contacts";
+import { Form, useFetcher, useLoaderData } from "react-router-dom";
+import { getContact, updateContact } from "../contacts";
 
 export async function loader({ params }) {
   return getContact(params.contactId);
 }
+export async function action({ request, params }) {
+  let formData = await request.formData();
+  return updateContact(params.contactId, {
+    favorite: formData.get("favorite") === "true",
+  });
+}
 
 export default function Contact() {
-    const contact = useLoaderData();
+  const contact = useLoaderData();
+  /**
+   *  useFetcher hook. It allows us to communicate with loaders and actions without causing a navigation.
+   */
 
   return (
     <div id="contact">
@@ -61,8 +69,9 @@ export default function Contact() {
 function Favorite({ contact }) {
   // yes, this is a `let` for later
   let favorite = contact.favorite;
+  const fetcher = useFetcher();
   return (
-    <Form method="post">
+    <fetcher.Form method="post">
       <button
         name="favorite"
         value={favorite ? "false" : "true"}
@@ -70,6 +79,6 @@ function Favorite({ contact }) {
       >
         {favorite ? "★" : "☆"}
       </button>
-    </Form>
+    </fetcher.Form>
   );
 }
