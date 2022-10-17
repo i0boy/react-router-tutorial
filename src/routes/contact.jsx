@@ -67,9 +67,18 @@ export default function Contact() {
 }
 
 function Favorite({ contact }) {
+  const fetcher = useFetcher();
   // yes, this is a `let` for later
   let favorite = contact.favorite;
-  const fetcher = useFetcher();
+  /**
+   *The fetcher knows the form data being submitted to the action, so it's available to you on fetcher.formData. 
+   We'll use that to immediately update the star's state, 
+   even though the network hasn't finished. 
+   If the update eventually fails, the UI will revert to the real data.
+   */
+  if (fetcher.formData) {
+    favorite = fetcher.formData.get("favorite") === "true";
+  }
   return (
     <fetcher.Form method="post">
       <button
