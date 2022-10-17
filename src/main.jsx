@@ -26,30 +26,38 @@ const router = createBrowserRouter([
     // React Router prevents that and sends the request to your action instead, including the FormData.
     action: rootAction,
     children: [
-      // Note the { index:true } instead of { path: "" }.
-      { index: true, element: <Index /> },
       {
-        path: "contacts/:contactId",
-        element: <Contact />,
-        loader: contactLoader,
-        action: contactAction,
-      },
-      {
-        path: "contacts/:contactId/edit",
-        element: <EditContact />,
-        loader: contactLoader,
-        action: editAction,
-      },
-      {
-        path: "contacts/:contactId/destroy",
-        errorElement: <div>Oops! There was an error.</div>,
-        /**
-         * Because the destroy route has its own errorElement and is a child of the root route,
-         * the error will render there instead of the root.
-         * As you probably noticed, these errors bubble up to the nearest errorElement.
-         * Add as many or as few as you like!
-         */
-        action: destroyAction,
+        // pathless routes. for all error under the outlet of root page.
+        // We could add the error element to every one of the child routes but, since it's all the same error page, this isn't recommended.
+        errorElement: <ErrorPage />,
+        children: [
+          // // Note the { index:true } instead of { path: "" }.
+          { index: true, element: <Index /> },
+          // pathless routes. for all error under the outlet of root page.
+          {
+            path: "contacts/:contactId",
+            element: <Contact />,
+            loader: contactLoader,
+            action: contactAction,
+          },
+          {
+            path: "contacts/:contactId/edit",
+            element: <EditContact />,
+            loader: contactLoader,
+            action: editAction,
+          },
+          {
+            path: "contacts/:contactId/destroy",
+            errorElement: <div>Oops! There was an error.</div>,
+            /**
+             * Because the destroy route has its own errorElement and is a child of the root route,
+             * the error will render there instead of the root.
+             * As you probably noticed, these errors bubble up to the nearest errorElement.
+             * Add as many or as few as you like!
+             */
+            action: destroyAction,
+          },
+        ],
       },
     ],
   },
